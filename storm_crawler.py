@@ -8,9 +8,6 @@ from os import listdir
 from os.path import isfile, isdir, join
 # encoding:utf-8
 import json
-import mongodb
-from mongodb import collection
-
 import hashlib
 
 
@@ -19,9 +16,8 @@ url = {}
 headers =  {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
 news_dict = {}
 
-text_club = "風傳媒"
-md = hashlib.md5()
-ai = 1
+media = "風傳媒"
+#md = hashlib.md5()
 
 r = requests.get("https://www.storm.mg/articles", headers = headers)#get HTML
 r.encoding='UTF-8'
@@ -29,49 +25,36 @@ soup = BeautifulSoup(r.text,"html.parser")
 sel = soup.find_all('div', 'category_card card_thumbs_left')
 count = 0
 for s in sel:
-	url[count] = s.find('a')['href']
-	# if count!=0 and count!=len(sel)-1:
-	# 	url[sel[count].text] = sel[count].find('a')['href']
-	# if count==len(sel)-1:
-	# 	sel = sel[count].find_all('a', onclick = True)
-	# 	i = 0
-	# 	for se in sel:
-	# 		if i!=len(sel)-1:
-	# 			url[sel[i].text] = sel[i]['href']
-	# 		i+=1	
+	url[count] = s.find('a')['href']	
 	count+=1
-# print(url)	
-first = True
+count = 0
 for u in url:
 	category = []
 	try:
 		r = requests.get(url[u])#get HTML
 		r.encoding='UTF-8'
-		soup = BeautifulSoup(r.text,"html.parser") #將網頁資料以html.parser
+		soup = BeautifulSoup(r.text,"html.parser")
 		sel = soup.find('div', id = 'title_tags_wrapper')
 		for s in sel.find_all('a'):
 			category.append(s.get_text())
 		title = soup.find('h1', id = 'article_title').text	
-		content = ""
-		tag = ""
+		content = []
+		tags = []
 		for p in soup.find('div', id = 'CMS_wrapper').find_all('p'):
-			content+=(p.text)
-		date = soup.find('span', 'info_time').text
-		md.update((str)(title+date+text_club).encode('utf-8'))                   #制定需要加密的字符串
-		news_dict['id'] = md.hexdigest()
+			content.append(p.text)
+		pubdate = soup.find('span', id = 'info_time').text
+		
+		news_dict['id'] = count
 		news_dict['title'] = title
 		news_dict['content'] = content
 		news_dict['category'] = category
-		news_dict['date'] = date
-		news_dict['news_club'] = text_club
-		news_dict['tag'] = tag
+		news_dict['pubdate'] = pubdate
+		news_dict['media'] = media
+		news_dict['tags'] = tags
 		news_dict['url'] = url[u]
 	
-		# print(news_dict)
-		# print("\naaaaaaaaaaaaaaaaaaaaaaaa\n\n")
-
-		mongodb.logindb();
-		x = collection.update_many({"id": news_dict['id']}, {"$set": news_dict}, upsert=True)
+		print(news_dict)
+		
 	except Exception as e:
 		print("風傳媒storm")
 		print(e)
