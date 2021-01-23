@@ -1,39 +1,28 @@
 # -!- coding: utf-8 -!-
 import requests
-import csv
 from bs4 import BeautifulSoup
+from utilities import get_page
 import time
-import codecs
-from os import listdir
-from os.path import isfile, isdir, join
-# encoding:utf-8
-import json
 import hashlib
 
 
-url_title = 'https://tfc-taiwan.org.tw/'
-url = {}
-headers =  {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
+base = 'https://tfc-taiwan.org.tw/'
+urls = []
 news_dict = {}
 
 media = "台灣事實查核中心"
 md = hashlib.md5()
 
-r = requests.get("https://tfc-taiwan.org.tw/articles/report", headers = headers)#get HTML
-r.encoding='UTF-8'
-soup = BeautifulSoup(r.text,"html.parser")
+soup = get_page("https://tfc-taiwan.org.tw/articles/report")
 titles = soup.find_all('div', class_='view-content')[0].find_all('h3')
-count = 0
 
 for title in titles:
-	url_temp = url_title + title.find('a')['href']
-	url[count] = url_temp
-	count+=1
-	
-for u in url:
-	r = requests.get(url[u], headers = headers)#get HTML
-	r.encoding='UTF-8'
-	soup = BeautifulSoup(r.text,"html.parser") #將網頁資料以html.parser
+	url_temp = base + title.find('a')['href']
+	urls.append(url_temp)
+
+count = 0
+for url in urls:
+	soup = get_page(url)
 	try:
 		category = soup.find('div','field-name-field-taxo-report-attr').text.strip()
 		title = soup.find('h2', 'node-title').text
@@ -44,18 +33,19 @@ for u in url:
 		tags = []
 		date = soup.find('div', 'submitted').text
 
-		news_dict['id'] = u #need to fix
+		news_dict['id'] = count #need to fix
 		news_dict['title'] = title
 		news_dict['content'] = content
 		news_dict['category'] = category
 		news_dict['pubdate'] = date
 		news_dict['media'] = media
 		news_dict['tags'] = tags
-		news_dict['url'] = url[u]
+		news_dict['url'] = url
 		print(news_dict)
+		count+=1
 		
 	except Exception as e:
 		print("台灣事實查核中心")
-		print(url[u])
+		print(url)
 		print(e)
 		continue

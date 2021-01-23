@@ -1,31 +1,26 @@
 # -!- coding: utf-8 -!-
 import requests
-from bs4 import BeautifulSoup as bs4
+from bs4 import BeautifulSoup
+from utilities import get_page
 import time
 import codecs
 import hashlib
 
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
 news_dict = {}
 media = '中時'
 md = hashlib.md5() #for hash
-
 
 #retrieve news list for first two pages
 links = ['https://www.chinatimes.com/realtimenews/','https://www.chinatimes.com/realtimenews/?page=2']
 urls = []
 for link in links:
-    r = requests.get(link,headers=headers)
-    r.encoding='UTF-8'
-    soup = bs4(r.text,'html.parser')
+    soup = get_page(link)
     sel = soup.find_all('div', class_='articlebox-compact')
 
     for s in sel:
         #NOT FULL URL
         u = s.find(class_='title').find('a')['href']
         urls.append(u)
-
-news_dict = {}
 
 article_count = 0
 for u in urls:
@@ -35,9 +30,7 @@ for u in urls:
         url_each+=u
         
         #for particular soup
-        r_each = requests.get(url_each,headers=headers)
-        r_each.encoding = 'UTF-8'
-        soup_each = bs4(r_each.text,'html.parser')
+        soup_each = get_page(url_each)
         
         title = soup_each.find(class_='article-title').text
         datetime = soup_each.find('time') #time

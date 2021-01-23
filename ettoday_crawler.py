@@ -1,38 +1,26 @@
 # -!- coding: utf-8 -!-
 import requests
-import csv
 from bs4 import BeautifulSoup
+from utilities import get_page
 import time
-import codecs
-from os import listdir
-from os.path import isfile, isdir, join
-# encoding:utf-8
-import json
 import hashlib
 
-
-
-url = "https://www.ettoday.net/"
-headers =  {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
+base = "https://www.ettoday.net/"
 news_dict = {}
 
 media = "ettoday"
 md = hashlib.md5()
-ai = 1
 
-r = requests.get("https://www.ettoday.net/news/news-list.htm", headers = headers)#get HTML
-r.encoding='UTF-8'
-soup = BeautifulSoup(r.text,"html.parser")
+soup = get_page("https://www.ettoday.net/news/news-list.htm")
 sel = soup.find('div', 'part_list_2').find_all('h3')
 count = 0
+
 for s in sel:
 	date = s.find('span').text	
 	category = s.find('em').text
-	u = url + s.find('a')['href']
+	url = base + s.find('a')['href']
 	try:
-		r = requests.get(u)#get HTML
-		r.encoding='UTF-8'
-		soup = BeautifulSoup(r.text,"html.parser") #將網頁資料以html.parser
+		soup = get_page(url)
 		title = soup.find('h1', 'title').text
 		#print(title,u)
 		content = []
@@ -56,7 +44,7 @@ for s in sel:
 		news_dict['pubdate'] = date
 		news_dict['media'] = media
 		news_dict['tags'] = tags
-		news_dict['url'] = u
+		news_dict['url'] = url
 		
 		print(news_dict)
 
@@ -66,6 +54,6 @@ for s in sel:
 
 	except Exception as e:
 		print("ETtoday")
-		print(u)
+		print(url)
 		print(e)
 		continue

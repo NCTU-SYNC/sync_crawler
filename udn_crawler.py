@@ -1,12 +1,11 @@
 # -!- coding: utf-8 -!-
 import requests
-from bs4 import BeautifulSoup as bs4
+from bs4 import BeautifulSoup
+from utilities import get_page
 import time
 import codecs
 import hashlib
 
-
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
 news_dict = {}
 
 media = '聯合'
@@ -14,9 +13,7 @@ md = hashlib.md5()
 
 #retrieve news list
 main_link = 'https://udn.com/news/breaknews/1/99#breaknews'
-r = requests.get(main_link,headers=headers)
-r.encoding='UTF-8'
-soup = bs4(r.text,'html.parser')
+soup = get_page(main_link)
 sel = soup.find_all('div', class_='story-list__text')
 urls = []
 for s in sel:
@@ -34,10 +31,7 @@ for u in urls:
     try:
         url_each = 'https://udn.com/'
         url_each += u
-        #for particular soup
-        r_each = requests.get(url_each,headers=headers)
-        r_each.encoding = 'UTF-8'
-        soup_each = bs4(r_each.text,'html.parser')
+        soup_each = get_page(url_each)
         
         title = soup_each.find(class_='article-content__title').text
         date = soup_each.find(class_='article-content__time').text

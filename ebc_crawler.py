@@ -1,38 +1,27 @@
 # -!- coding: utf-8 -!-
 import requests
-import csv
 from bs4 import BeautifulSoup
+from utilities import get_page
 import time
-import codecs
-from os import listdir
-from os.path import isfile, isdir, join
-# encoding:utf-8
-import json
 import hashlib
 
 
 url_base = "https://news.ebc.net.tw/"
-url = {}
-headers =  {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
+urls = []
 news_dict = {}
 
 media = "東森"
 md = hashlib.md5()
-
-r = requests.get("https://news.ebc.net.tw/realtime", headers = headers) #get HTML
-r.encoding='UTF-8'
-soup = BeautifulSoup(r.text,"html.parser")
+soup = get_page("https://news.ebc.net.tw/realtime")
 sel = soup.find('div', 'news-list-box').find_all('div', 'style1 white-box') #get news list
-count = 0
+
 for s in sel:
-	url[count] = url_base + s.find('a')['href']
-	count+=1	
-print(count)
-count = 0			
-for u in url:
-	r = requests.get(url[u], headers = headers)#get HTML
-	r.encoding='UTF-8'
-	soup = BeautifulSoup(r.text,"html.parser")
+	urls.append(url_base + s.find('a')['href'])
+	
+
+count = 0		
+for url in urls:
+	soup = get_page(url)
 	try:
 		category = soup.find('div', id = 'web-map').find_all('a')[1].text
 		title = soup.find('div', 'fncnews-content').find('h1').text
@@ -56,9 +45,13 @@ for u in url:
 			for s in sel:
 				tags.append(s.text)
 		except:
-			tags = []		
-		date = soup.find('span', 'small-gray-text').text
-		
+			tags = []
+
+		#date
+		gray_text = soup.find('span', 'small-gray-text').text
+		gray_text = gray_text.split()
+		date = gray_text[0]+' '+gray_text[1]
+
 		news_dict['id'] = count
 		news_dict['title'] = title
 		news_dict['content'] = article_content
@@ -66,13 +59,13 @@ for u in url:
 		news_dict['pubdate'] = date
 		news_dict['media'] = media
 		news_dict['tags'] = tags
-		news_dict['url'] = url[u]
+		news_dict['url'] = url
 		print(news_dict)
 
 		count += 1
 
 	except Exception as e:
 		print("東森ebc")
-		print(url[u])
+		print(url)
 		print(e)
 		continue

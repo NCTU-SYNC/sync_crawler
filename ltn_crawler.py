@@ -1,16 +1,9 @@
 # -!- coding: utf-8 -!-
 import requests
-import csv
 from bs4 import BeautifulSoup
-import time
-import codecs
-from os import listdir
-from os.path import isfile, isdir, join
-# encoding:utf-8
+from utilities import get_page
 import json
-#import mongodb
-#from mongodb import collection
-
+import time
 import hashlib
 
 
@@ -26,7 +19,7 @@ def get_one_page(url):
         	return response.json()
         return None
     except :
-        print("抓取失败")
+        print("page fetch fail")
 
 def parse_data():
 	first = True
@@ -44,7 +37,8 @@ def parse_data():
 				number = str(count)
 				urls.append(data['data'][number]['url'])
 				count+=1
-		first = False									
+		first = False
+						
 parse_data()
 
 news_dict = {}
@@ -53,11 +47,9 @@ media = "自由時報"
 md = hashlib.md5()
 
 count = 0
-for u in urls:
+for url in urls:
 	try:
-		r = requests.get(u, headers = headers)#get HTML
-		r.encoding='UTF-8'
-		soup = BeautifulSoup(r.text,"html.parser")
+		soup = get_page(url)
 		title = soup.find('h1').text
 		content = []
 		tags = []
@@ -78,8 +70,8 @@ for u in urls:
 				continue
 			content.append(p.text)
 			pcount -= 1
-		start = u.find('//')+2
-		link_cat = u[start:u.find('.')]
+		start = url.find('//')+2
+		link_cat = url[start:url.find('.')]
 		if categories.get(link_cat):
 			category = categories[link_cat]
 		else:
@@ -91,7 +83,7 @@ for u in urls:
 				raise AttributeError
 		
 		pubdate = soup.find('span', 'time').text.strip()
-		#md.update((str)(title+date+media).encode('utf-8'))                   #制定需要加密的字符串
+
 		news_dict['id'] = count
 		news_dict['title'] = title
 		news_dict['content'] = content
@@ -99,13 +91,13 @@ for u in urls:
 		news_dict['pubdate'] = pubdate
 		news_dict['media'] = media
 		news_dict['tags'] = tags
-		news_dict['url'] = u
+		news_dict['url'] = url
 	
 		print(news_dict)
 		count+=1
 
 	except Exception as e:
 		print("自由時報ltn")
-		print(u)
+		print(url)
 		print(e)
 		continue
