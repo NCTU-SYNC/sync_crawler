@@ -1,7 +1,7 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from utilities import get_page
+from utilities import get_page,generate_hash,db_init,db_update
 import json
 import time
 import hashlib
@@ -41,17 +41,19 @@ def parse_data():
 						
 parse_data()
 
-news_dict = {}
+media = '自由時報'
 
-media = "自由時報"
-md = hashlib.md5()
+#db initialization
+collection = db_init(media)
 
-count = 0
+article_count = 0
 for url in urls:
 	try:
 		soup = get_page(url)
 		title = soup.find('h1').text
 		content = []
+		content_str = ""
+		content_str += title
 		tags = []
 		
 		#website has been partly rewritten, therefore have to try two possibilities
@@ -69,32 +71,40 @@ for url in urls:
 			if '請繼續往下閱讀' in para:
 				continue
 			content.append(p.text)
+			content_str += p.text
 			pcount -= 1
+		
 		start = url.find('//')+2
 		link_cat = url[start:url.find('.')]
 		if categories.get(link_cat):
 			category = categories[link_cat]
 		else:
 			try:
-				category = 	soup.find('div', 'breadcrumbs boxTitle boxText').text
-				category = 	category[6:].strip()
+				category = soup.find('div', 'breadcrumbs boxTitle boxText').text
+				category = category[6:].strip()
 			except AttributeError:
 				print('Error when finding category.')
 				raise AttributeError
 		
-		pubdate = soup.find('span', 'time').text.strip()
+		modified_date = soup.find('span', 'time').text.strip()
 
-		news_dict['id'] = count
+		url_hash = generate_hash(url)
+		content_hash = generate_hash(content_str)
+
+		news_dict = {}
 		news_dict['title'] = title
 		news_dict['content'] = content
 		news_dict['category'] = category
-		news_dict['pubdate'] = pubdate
+		news_dict['modified_date'] = modified_date
 		news_dict['media'] = media
 		news_dict['tags'] = tags
 		news_dict['url'] = url
-	
+		news_dict['url_hash'] = url_hash
+		news_dict['content_hash'] = content_hash
+
+		db_update(collection,news_dict)
 		print(news_dict)
-		count+=1
+		article_count+=1
 
 	except Exception as e:
 		print("自由時報ltn")

@@ -1,25 +1,24 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from utilities import get_page
+from utilities import get_page,generate_hash,db_init,db_update
 import time
 import hashlib
 
+media = '東森'
 
-url_base = "https://news.ebc.net.tw/"
-urls = []
-news_dict = {}
+#db initialization
+collection = db_init(media)
 
-media = "東森"
-md = hashlib.md5()
 soup = get_page("https://news.ebc.net.tw/realtime")
 sel = soup.find('div', 'news-list-box').find_all('div', 'style1 white-box') #get news list
 
+url_base = "https://news.ebc.net.tw"
+urls = []
 for s in sel:
 	urls.append(url_base + s.find('a')['href'])
-	
 
-count = 0		
+article_count = 0		
 for url in urls:
 	soup = get_page(url)
 	try:
@@ -28,6 +27,8 @@ for url in urls:
 
 		content_sel = soup.find('div', 'raw-style').find_all('p')
 		article_content = []
+		content_str = ""
+		content_str += title
 		for p in content_sel:
 			content = p.text
 			#clear unwanted content
@@ -38,6 +39,7 @@ for url in urls:
 			if '\xa0' == content:
 				continue			
 			article_content.append(content.strip())
+			content_str += content.strip()
 		
 		tags = []
 		try:
@@ -50,20 +52,27 @@ for url in urls:
 		#date
 		gray_text = soup.find('span', 'small-gray-text').text
 		gray_text = gray_text.split()
-		date = gray_text[0]+' '+gray_text[1]
+		modified_date = gray_text[0]+' '+gray_text[1]
 
-		news_dict['id'] = count
+		url_hash = generate_hash(url)
+		content_hash = generate_hash(content_str)
+
+		news_dict = {}
 		news_dict['title'] = title
 		news_dict['content'] = article_content
 		news_dict['category'] = category
-		news_dict['pubdate'] = date
+		news_dict['modified_date'] = modified_date
 		news_dict['media'] = media
 		news_dict['tags'] = tags
 		news_dict['url'] = url
+		news_dict['url_hash'] = url_hash
+		news_dict['content_hash'] = content_hash
+
+		db_update(collection,news_dict)
 		print(news_dict)
 
-		count += 1
-
+		article_count += 1
+		
 	except Exception as e:
 		print("東森ebc")
 		print(url)
