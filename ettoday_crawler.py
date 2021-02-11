@@ -1,70 +1,94 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from utilities import get_page,generate_hash,db_init,db_update
-import time
+import time,datetime
 import hashlib
 
-base = "https://www.ettoday.net"
+def ettoday_crawler(size=30):
 
-media = 'ettoday'
+	base = "https://www.ettoday.net"
 
-#db initialization
-collection = db_init(media)
+	media = 'ettoday'
+	article_list = list()
 
-soup = get_page("https://www.ettoday.net/news/news-list.htm")
-sel = soup.find('div', 'part_list_2').find_all('h3')
-article_count = 0
+	#initiate chrome webdriver
 
-for s in sel:
-	modified_date = s.find('span').text	
-	category = s.find('em').text
-	url = base + s.find('a')['href']
-	try:
-		soup = get_page(url)
-		title = soup.find('h1', 'title').text
+	options = Options()
+	options.add_argument("--disable-notifications")
+	options.headless = True
 
-		article_content = []
-		content_str = ""
-		content_str += title
-		tags = []
-		for p in soup.find('div','story').find_all('p'):
-			pText = p.text
-			
-			if '►' in pText or '▲' in pText or '·' in pText or pText == '' or '▼' in pText:
-				continue
-			if '更多鏡週刊報導' in pText or '你可能也想看' in pText or '其他新聞' in pText or '其他人也看了' in pText or '更多新聞' in pText:
+	driver = webdriver.Chrome('chromedriver', options=options)
+	driver.get("https://www.ettoday.net/news/news-list.htm")
+	for _ in range(1,3):
+		driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+		time.sleep(3)
+
+	#db initialization
+	#collection = db_init(media)
+
+	soup = BeautifulSoup(driver.page_source, 'html.parser')
+	sel = soup.find('div', 'part_list_2').find_all('h3')
+	article_count = 0
+
+	#exit selenium
+	driver.quit()
+
+	for s in sel:
+		modified_date = s.find('span').text
+		modified_date = datetime.datetime.strptime(modified_date, "%Y/%m/%d %H:%M")
+		category = s.find('em').text
+		url = base + s.find('a')['href']
+		try:
+			soup = get_page(url)
+			title = soup.find('h1', 'title').text
+
+			article_content = []
+			content_str = ""
+			content_str += title
+			tags = []
+			for p in soup.find('div','story').find_all('p'):
+				pText = p.text
+				
+				if '►' in pText or '▲' in pText or '·' in pText or pText == '' or '▼' in pText:
+					continue
+				if '更多鏡週刊報導' in pText or '你可能也想看' in pText or '其他新聞' in pText or '其他人也看了' in pText or '更多新聞' in pText:
+					break
+				
+				article_content.append(p.text)
+				content_str += p.text
+				
+			#find tags
+			tags = soup.find("meta",attrs={"name": "news_keywords"}).attrs['content'].split(',')
+
+			url_hash = generate_hash(url)
+			content_hash = generate_hash(content_str)
+
+			news_dict = {}
+			news_dict['title'] = title
+			news_dict['content'] = article_content
+			news_dict['category'] = category
+			news_dict['modified_date'] = modified_date
+			news_dict['media'] = media
+			news_dict['tags'] = tags
+			news_dict['url'] = url
+			news_dict['url_hash'] = url_hash
+			news_dict['content_hash'] = content_hash
+
+			#db_update(collection,news_dict)
+			#print(news_dict)
+			article_list.append(news_dict)
+
+			article_count+=1
+			if article_count >= size:
 				break
-			
-			article_content.append(p.text)
-			content_str += p.text
-			
-		#find tags
-		tags = soup.find("meta",attrs={"name": "news_keywords"}).attrs['content'].split(',')
 
-		url_hash = generate_hash(url)
-		content_hash = generate_hash(content_str)
+		except Exception as e:
+			print("ETtoday")
+			print(url)
+			print(e)
+			continue
 
-		news_dict = {}
-		news_dict['title'] = title
-		news_dict['content'] = article_content
-		news_dict['category'] = category
-		news_dict['modified_date'] = modified_date
-		news_dict['media'] = media
-		news_dict['tags'] = tags
-		news_dict['url'] = url
-		news_dict['url_hash'] = url_hash
-		news_dict['content_hash'] = content_hash
-
-		db_update(collection,news_dict)
-		print(news_dict)
-
-		article_count+=1
-		#if article_count >= 50:
-		#	break
-
-	except Exception as e:
-		print("ETtoday")
-		print(url)
-		print(e)
-		continue
+	return article_list
