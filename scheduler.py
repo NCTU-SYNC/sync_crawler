@@ -11,6 +11,13 @@ from pymongo import MongoClient
 import utilities as u
 import schedule,time,pymongo
 
+MONGODB_URI_LOCAL = 'mongodb://localhost:27017/'
+MONGODB_URI_MAIN  = ''
+LOCAL_DATABASE = 'test_sync_local'
+LOCAL_COLLECTION = 'news'
+MAIN_DATABASE = 'sync'
+MAIN_COLLECTION = 'test_news'
+
 CHINATIMES_FREQ = 10
 CNA_FREQ = 10
 CTS_FREQ = 10
@@ -31,6 +38,9 @@ LTN_NUM = 30
 STORM_NUM = 30
 UDN_NUM = 30
 
+MEDIA_LIST = ['中時','中央社','華視','東森','ettoday','台灣事實查核中心','自由時報','風傳媒','聯合']
+MEDIA_LIST_EN = ['chinatimes', 'cna', 'cts', 'ebc', 'ettoday', 'factcheckcenter', 'ltn', 'storm', 'udn']
+
 crawlers = {
     'chinatimes'     : chinatimes_crawler,
     'cna'            : cna_crawler,
@@ -43,62 +53,70 @@ crawlers = {
     'udn'            : udn_crawler
 }
 
-def store_database(media,num_of_articles):
+def crawl_and_store(media,num_of_articles,mongodb_uri_local,mongodb_uri_main):
     u.log_info('Crawling {} ...'.format(media))
-    collection = u.db_init('sync_local',media)
-    collection_main = u.db_init('sync',media)
+
+    collection_local = u.get_db_instance(LOCAL_DATABASE,LOCAL_COLLECTION,mongodb_uri_local)
+    collection_main = u.get_db_instance(MAIN_DATABASE,MAIN_COLLECTION,mongodb_uri_main)
     recent_news = crawlers[media](num_of_articles)
     u.log_info('Updating database ...')
     for article in recent_news:
-        u.dbs_update(collection,collection_main,article)
+        u.update_dbs(collection_local,collection_main,article)
     u.log_info('Update complete.')
 
-# delete database portion
-def delete_n_articles(media,n):
-    """ Delete oldest n articles of the collection """
-    collection = u.db_init('sync_local',media)
-    oldest_n = list(collection.find().sort('modified_date',pymongo.ASCENDING).limit(n))
+def delete_n_documents(collection,media,n):
+    """ Delete n of the oldest articles of from the collection """
+    oldest_n = list(collection.find({'media':media}).sort('modified_date',pymongo.ASCENDING).limit(n))
     for document in oldest_n:
         doc_id = document['_id']
         collection.delete_one({'_id':doc_id})
 
 #Jobs
 def chinatimes(num_of_articles):
-    store_database('chinatimes',num_of_articles)
+    crawl_and_store('chinatimes',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def cna(num_of_articles):
-    store_database('cna',num_of_articles)
+    crawl_and_store('cna',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def cts(num_of_articles):
-    store_database('cts',num_of_articles)
+    crawl_and_store('cts',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def ebc(num_of_articles):
-    store_database('ebc',num_of_articles)
+    crawl_and_store('ebc',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def ettoday(num_of_articles):
-    store_database('ettoday',num_of_articles)
+    crawl_and_store('ettoday',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def factcheckcenter(num_of_articles):
-    store_database('factcheckcenter',num_of_articles)
+    crawl_and_store('factcheckcenter',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def ltn(num_of_articles):
-    store_database('ltn',num_of_articles)
+    crawl_and_store('ltn',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def storm(num_of_articles):
-    store_database('storm',num_of_articles)
+    crawl_and_store('storm',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
 
 def udn(num_of_articles):
-    store_database('udn',num_of_articles)
+    crawl_and_store('udn',num_of_articles,MONGODB_URI_LOCAL,MONGODB_URI_MAIN)
     
-def clear_databases(n):
+def clear_local_database(n,limit,mongodb_uri_local):
+    """ Check each media, delete n documents if # of current documents exceed limit.
+
+        Arguments:
+        n    : number of documents to delete
+        limit: start deletion if number of documents of each media exceeds limit
+    """
     u.log_info('Local database size check...')
-    for media in crawlers:
-        collection = u.db_init('sync_local',media)
-        u.log_info('Checking: {} ...'.format(media))
-        collection_size = collection.estimated_document_count()
-        if collection_size > 40:
-            u.log_info('{0} has {1} documents. Begin deletion ...'.format(media,collection_size))
-            delete_n_articles(media,n)
+    for media in MEDIA_LIST:
+        collection = u.get_db_instance(LOCAL_DATABASE,LOCAL_COLLECTION,mongodb_uri_local)
+        #u.log_info('Checking: {} ...'.format(media))
+        current_size = collection.count_documents({'media':media})
+        if current_size > limit:
+            u.log_info('{0} has {1} documents. Begin deletion ...'.format(media,current_size))
+            delete_n_documents(collection,media,n)
+            current_count = collection.count_documents({'media':media})
+            u.log_info('count after deletion:{}'.format(current_count))
+
 
 schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
 schedule.every(CNA_FREQ).minutes.do(cna,num_of_articles=CNA_NUM)
@@ -109,7 +127,7 @@ schedule.every(FACTCHECKCENTER_FREQ).minutes.do(factcheckcenter,num_of_articles=
 schedule.every(LTN_FREQ).minutes.do(ltn,num_of_articles=LTN_NUM)
 schedule.every(STORM_FREQ).minutes.do(storm,num_of_articles=STORM_NUM)
 schedule.every(UDN_FREQ).minutes.do(udn,num_of_articles=UDN_NUM)
-schedule.every(20).minutes.do(clear_databases,30)
+schedule.every(20).minutes.do(clear_local_database,n=30,limit=40,mongodb_uri_local=MONGODB_URI_LOCAL)
 
 while True:
     schedule.run_pending()

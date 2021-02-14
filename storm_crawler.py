@@ -1,7 +1,7 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from utilities import get_page,generate_hash,db_init,db_update
+from utilities import get_page,generate_hash
 import time,datetime
 import hashlib
 
@@ -11,8 +11,6 @@ def storm_crawler(size=30):
 	media = "風傳媒"
 	article_list = list()
 
-	#db initialization
-	#collection = db_init(media)
 
 	links = ["https://www.storm.mg/articles","https://www.storm.mg/articles/2",
 			"https://www.storm.mg/articles/3","https://www.storm.mg/articles/4",
@@ -58,7 +56,6 @@ def storm_crawler(size=30):
 			news_dict['url_hash'] = url_hash
 			news_dict['content_hash'] = content_hash
 
-			#db_update(collection,news_dict)
 			article_list.append(news_dict)
 			#print(news_dict)
 			article_count+=1

@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from utilities import get_page,generate_hash,db_init,db_update
+from utilities import get_page,generate_hash
 import time,datetime
 import hashlib,utilities
 
@@ -11,8 +11,7 @@ def udn_crawler(size=30):
 
     media = '聯合'
     article_list = list()
-    #db initialization
-    #collection = db_init(media)
+
     try:
         #initiate chrome webdriver
         options = Options()
@@ -82,7 +81,6 @@ def udn_crawler(size=30):
             news_dict['url_hash'] = url_hash
             news_dict['content_hash'] = content_hash
 
-            #db_update(collection,news_dict)
             #print(news_dict)
             article_count+=1
             

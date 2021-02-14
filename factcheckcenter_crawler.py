@@ -1,7 +1,7 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from utilities import get_page,generate_hash,db_init,db_update
+from utilities import get_page,generate_hash
 import time,datetime
 import hashlib
 
@@ -11,9 +11,6 @@ def factcheckcenter_crawler(size=10):
 
 	media = '台灣事實查核中心'
 	article_list = list()
-
-	#db initialization
-	#collection = db_init(media)
 
 	soup = get_page("https://tfc-taiwan.org.tw/articles/report")
 	titles = soup.find_all('div', class_='view-content')[0].find_all('h3')
@@ -54,7 +51,6 @@ def factcheckcenter_crawler(size=10):
 			news_dict['url_hash'] = url_hash
 			news_dict['content_hash'] = content_hash
 
-			#db_update(collection,news_dict)
 			#print(news_dict)
 			article_list.append(news_dict)
 

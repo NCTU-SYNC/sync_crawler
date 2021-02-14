@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from utilities import get_page,generate_hash,db_init,db_update
+from utilities import get_page,generate_hash
 import time,datetime
 import hashlib
 
@@ -25,9 +25,6 @@ def ettoday_crawler(size=30):
 	for _ in range(1,3):
 		driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
 		time.sleep(3)
-
-	#db initialization
-	#collection = db_init(media)
 
 	soup = BeautifulSoup(driver.page_source, 'html.parser')
 	sel = soup.find('div', 'part_list_2').find_all('h3')
@@ -77,7 +74,6 @@ def ettoday_crawler(size=30):
 			news_dict['url_hash'] = url_hash
 			news_dict['content_hash'] = content_hash
 
-			#db_update(collection,news_dict)
 			#print(news_dict)
 			article_list.append(news_dict)
 

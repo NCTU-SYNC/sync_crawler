@@ -1,7 +1,7 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from utilities import get_page,generate_hash,db_init,db_update
+from utilities import get_page,generate_hash
 import time
 import hashlib
 import datetime
@@ -10,9 +10,6 @@ def cts_crawler(size=30):
 
 	media = "華視"
 	article_list = list()
-
-	#db initialization
-	#collection = db_init(media)
 
 	urls =[]
 
@@ -65,7 +62,6 @@ def cts_crawler(size=30):
 			news_dict['url_hash'] = url_hash
 			news_dict['content_hash'] = content_hash
 
-			#db_update(collection,news_dict)
 			#print(news_dict)
 			article_list.append(news_dict)
 

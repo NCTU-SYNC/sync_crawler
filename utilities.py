@@ -31,19 +31,21 @@ def log_info(msg):
     now = datetime.datetime.now()
     print("[{0}][INFO] {1}".format(now.strftime("%Y-%m-%d %H:%M:%S"),msg))
 
-def db_init(database,media):
-    """Returns a MongoClient collection instance depending on the media.
-    
-    Argument type: string
+def get_db_instance(database,collection,mongodb_uri='mongodb://localhost:27017/'):
+    """Returns a collection from the given database and mongoDB.
+
+    Arguments:
+        database: type string
+        collection: type string
+        mongodb_uri: type string, sample format: mongodb://localhost:27017/
     """
-    #db initialization
-    client = MongoClient()
+    client = MongoClient(mongodb_uri)
     db = client[database]
-    return db[media]
+    return db[collection]
 
 def db_update(collection,news_dict):
-    """Updates the database with news_dict.
-
+    """Updates the database with news_dict. *currently not in use*
+    
     The function is described as follows:
     1. First check whether there exists a document with the same url hash.
     2. If yes, check whether content is modified, update if modified, otherwise do nothing.
@@ -60,11 +62,11 @@ def db_update(collection,news_dict):
     else:
         collection.insert_one(news_dict)
 
-def dbs_update(collection,collection_main,news_dict):
+def update_dbs(collection_local,collection_main,news_dict):
     """Update both the local database and main database with news_dict.
 
     Arguments:
-    collection - local database
+    collection_local - local database
     collection_main - sync main database
     news_dict - document
 
@@ -73,13 +75,12 @@ def dbs_update(collection,collection_main,news_dict):
     2. If yes, check whether content is modified, update both dbs if modified, otherwise do nothing.
     3. Otherwise, insert new document into local db, update main db with upsert.
     """
-    find = collection.find_one( {'url_hash': news_dict['url_hash']} )
+    find = collection_local.find_one( {'url_hash': news_dict['url_hash']} )
     if find:
         if find['content_hash'] != news_dict['content_hash']:
-            log_info('{0}: data updated, link: {1}'.format(news_dict['media'],news_dict['url']))
-            collection.update_one({'_id': find['_id']},{'$set':news_dict})
+            collection_local.update_one({'_id': find['_id']},{'$set':news_dict})
             collection_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
     else:
-        collection.insert_one(news_dict)
+        collection_local.insert_one(news_dict)
         del news_dict['_id']
         collection_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
