@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
+import utilities
 import time,datetime
 import hashlib
 
@@ -59,6 +60,7 @@ def ebc_crawler(size=30):
 			gray_text = gray_text.split()
 			modified_date = gray_text[0]+' '+gray_text[1]
 			modified_date = datetime.datetime.strptime(modified_date, "%Y/%m/%d %H:%M")
+			modified_date = utilities.convert_to_utc(modified_date)
 
 			url_hash = generate_hash(url)
 			content_hash = generate_hash(content_str)

@@ -53,6 +53,7 @@ def udn_crawler(size=30):
             title = soup.find(class_='article-content__title').text
             modified_date = soup.find(class_='article-content__time').text
             modified_date = datetime.datetime.strptime(modified_date, "%Y-%m-%d %H:%M")
+            modified_date = utilities.convert_to_utc(modified_date)
             category = soup.find_all(class_='breadcrumb-items')[1].text
             tags = []
 

@@ -12,7 +12,7 @@ import utilities as u
 import schedule,time,pymongo
 
 MONGODB_URI_LOCAL = 'mongodb://localhost:27017/'
-MONGODB_URI_MAIN  = ''
+MONGODB_URI_MAIN  = '' #put in sync main database uri
 LOCAL_DATABASE = 'test_sync_local'
 LOCAL_COLLECTION = 'news'
 MAIN_DATABASE = 'sync'

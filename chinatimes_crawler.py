@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
+import utilities
 import time,datetime
 import hashlib
 
@@ -32,6 +33,7 @@ def chinatimes_crawler(size=30):
             date_tag = soup.find('time') #time
             modified_date = date_tag.find(class_='hour').text + ' ' + date_tag.find(class_='date').text #full date
             modified_date = datetime.datetime.strptime(modified_date, "%H:%M %Y/%m/%d")
+            modified_date = utilities.convert_to_utc(modified_date)
             category = soup.find_all(class_='breadcrumb-item')[1].text.strip()
             tags_span = soup.find_all(class_='hash-tag')
             tags = []

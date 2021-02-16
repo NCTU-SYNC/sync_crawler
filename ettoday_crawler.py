@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from utilities import get_page,generate_hash
+import utilities
 import time,datetime
 import hashlib
 
@@ -36,6 +37,8 @@ def ettoday_crawler(size=30):
 	for s in sel:
 		modified_date = s.find('span').text
 		modified_date = datetime.datetime.strptime(modified_date, "%Y/%m/%d %H:%M")
+		modified_date = utilities.convert_to_utc(modified_date)
+
 		category = s.find('em').text
 		url = base + s.find('a')['href']
 		try:

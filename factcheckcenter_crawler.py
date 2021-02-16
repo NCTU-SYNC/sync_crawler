@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
+import utilities
 import time,datetime
 import hashlib
 
@@ -36,6 +37,7 @@ def factcheckcenter_crawler(size=10):
 			tags = []
 			modified_date = soup.find('div', 'submitted').text
 			modified_date = datetime.datetime.strptime(modified_date, "%Y-%m-%d")
+			modified_date = utilities.convert_to_utc(modified_date)
 
 			url_hash = generate_hash(url)
 			content_hash = generate_hash(content_str)

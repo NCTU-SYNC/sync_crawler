@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+from datetime import datetime, timezone, timedelta
 import pymongo
 import datetime
 import hashlib
@@ -84,3 +85,11 @@ def update_dbs(collection_local,collection_main,news_dict):
         collection_local.insert_one(news_dict)
         del news_dict['_id']
         collection_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
+
+def convert_to_utc(date_object):
+    """ Convert a naive datetime object to aware datetime object with timezone = utc """
+    tz = timezone(timedelta(hours=+8))
+    new_date = date_object.replace(tzinfo = tz)
+    new_date = new_date.astimezone(tz)
+    utc_time = new_date.astimezone(timezone.utc)
+    return utc_time
