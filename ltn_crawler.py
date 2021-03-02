@@ -65,7 +65,7 @@ def ltn_crawler(size=30):
 				pcount = len(allpara)
 			
 			for p in allpara:
-				if pcount is 1:
+				if pcount == 1:
 					break
 				para = p.text
 				if '請繼續往下閱讀' in para:
