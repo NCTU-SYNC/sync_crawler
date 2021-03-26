@@ -38,17 +38,18 @@ def cts_crawler(size=30):
 			content_str = ""
 			content_str += title
 			tags = []
+
 			for p in content_sel[0].find_all(['p','h3']):
 				article_content.append(p.text)
 				content_str += p.text
 			
 			for a in soup.select("div.news-tag")[0].find_all('a'):
 				tags.append(a.text)
-
-			date_text = soup.select("p.artical-time")[0].text
+			
+			date_text = soup.select("time.artical-time")[0].text
 			modified_date = datetime.datetime.strptime(date_text, "%Y/%m/%d %H:%M")
 			modified_date = utilities.convert_to_utc(modified_date)
-
+			
 			url_hash = generate_hash(url)
 			content_hash = generate_hash(content_str)
 
@@ -70,7 +71,7 @@ def cts_crawler(size=30):
 			article_count+=1
 			if article_count >= size:
 				break
-
+			
 	except Exception as e:
 		print("cts")
 		print(url)
