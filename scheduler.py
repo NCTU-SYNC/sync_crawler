@@ -7,6 +7,7 @@ from factcheckcenter_crawler import factcheckcenter_crawler
 from ltn_crawler import ltn_crawler
 from storm_crawler import storm_crawler
 from udn_crawler import udn_crawler
+from setn_crawler import setn_crawler
 from pymongo import MongoClient
 from configparser import ConfigParser
 import utilities as u
@@ -34,6 +35,7 @@ FACTCHECKCENTER_FREQ = settings['freq'].getint('factcheckcenter')
 LTN_FREQ             = settings['freq'].getint('ltn')
 STORM_FREQ           = settings['freq'].getint('storm')
 UDN_FREQ             = settings['freq'].getint('udn')
+SETN_FREQ            = settings['freq'].getint('setn')
 
 CHINATIMES_NUM      = settings['number'].getint('chinatimes')
 CNA_NUM             = settings['number'].getint('cna')
@@ -44,13 +46,14 @@ FACTCHECKCENTER_NUM = settings['number'].getint('factcheckcenter')
 LTN_NUM             = settings['number'].getint('ltn')
 STORM_NUM           = settings['number'].getint('storm')
 UDN_NUM             = settings['number'].getint('udn')
+SETN_NUM            = settings['number'].getint('setn')
 
 CLEAR_NUM   = settings['reset_cache'].getint('clear_count')
 CLEAR_LIMIT = settings['reset_cache'].getint('clear_limit')
 CLEAR_FREQ  = settings['reset_cache'].getint('clear_freq')
 
-MEDIA_LIST = ['中時','中央社','華視','東森','ettoday','台灣事實查核中心','自由時報','風傳媒','聯合']
-MEDIA_LIST_EN = ['chinatimes', 'cna', 'cts', 'ebc', 'ettoday', 'factcheckcenter', 'ltn', 'storm', 'udn']
+MEDIA_LIST = ['中時','中央社','華視','東森','ettoday','台灣事實查核中心','自由時報','風傳媒','聯合','三立']
+MEDIA_LIST_EN = ['chinatimes', 'cna', 'cts', 'ebc', 'ettoday', 'factcheckcenter', 'ltn', 'storm', 'udn', 'setn']
 
 crawlers = {
     'chinatimes'     : chinatimes_crawler,
@@ -61,7 +64,8 @@ crawlers = {
     'factcheckcenter': factcheckcenter_crawler,
     'ltn'            : ltn_crawler,
     'storm'          : storm_crawler,
-    'udn'            : udn_crawler
+    'udn'            : udn_crawler,
+    'setn'           : setn_crawler
 }
 
 def crawl_and_store(media,num_of_articles):
@@ -110,6 +114,9 @@ def storm(num_of_articles):
 def udn(num_of_articles):
     crawl_and_store('udn',num_of_articles)
 
+def setn(num_of_articles):
+    crawl_and_store('setn',num_of_articles)
+
 def clear_local_database(n,limit):
     """ Check each media, delete n documents if # of current documents exceed limit.
 
@@ -138,6 +145,7 @@ schedule.every(FACTCHECKCENTER_FREQ).minutes.do(factcheckcenter,num_of_articles=
 schedule.every(LTN_FREQ).minutes.do(ltn,num_of_articles=LTN_NUM)
 schedule.every(STORM_FREQ).minutes.do(storm,num_of_articles=STORM_NUM)
 schedule.every(UDN_FREQ).minutes.do(udn,num_of_articles=UDN_NUM)
+schedule.every(SETN_FREQ).minutes.do(setn,num_of_articles=SETN_NUM)
 schedule.every(CLEAR_FREQ).minutes.do(clear_local_database,n=CLEAR_NUM,limit=CLEAR_LIMIT)
 
 while True:
