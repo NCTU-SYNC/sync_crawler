@@ -41,8 +41,14 @@ def ltn_crawler(size=30):
 
 	categories = {'health':'健康', 'video':'影音', 'ec':'財經', 'ent':'娛樂', 'auto':'汽車', 'istyle':'時尚','sports':'體育', '3c':'3C科技', 'talk':'評論','playing':'玩咖','food':'食譜','estate':'地產'}
 	urls = []
-	parse_data(urls)
-
+	try:
+		parse_data(urls)
+	except Exception as e:
+		print("自由時報ltn")
+		print('parse data error')
+		print(e)
+		return []
+	
 	media = '自由時報'
 	article_list = list()
 
