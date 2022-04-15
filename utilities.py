@@ -44,25 +44,6 @@ def get_db_instance(database,collection,mongodb_uri='mongodb://localhost:27017/'
     db = client[database]
     return db[collection]
 
-def db_update(collection,news_dict):
-    """Updates the database with news_dict. *currently not in use*
-    
-    The function is described as follows:
-    1. First check whether there exists a document with the same url hash.
-    2. If yes, check whether content is modified, update if modified, otherwise do nothing.
-    3. Otherwise, insert new document.
-    """
-    find = collection.find_one( {'url_hash': news_dict['url_hash']} )
-    if find:
-        if find['content_hash'] != news_dict['content_hash']:
-            log_info('{0}: data updated, link: {1}'.format(news_dict['media'],news_dict['url']))
-            collection.update_one({'_id': find['_id']},{'$set':news_dict})
-        # collection.update_one({'url_hash': news_dict['url_hash'],
-        #     'content_hash':{'$ne':news_dict['content_hash']}},
-        #     {'$set':news_dict})
-    else:
-        collection.insert_one(news_dict)
-
 def update_dbs(collection_local,collection_main,collection_dev_main,news_dict):
     """Update both the local database and main database with news_dict.
 
