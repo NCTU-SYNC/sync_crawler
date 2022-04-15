@@ -31,13 +31,19 @@ def udn_crawler(size=30):
     except Exception as error:
         utilities.log_info("Selenium start error, error code:")
         print(error)
+        driver.quit()
         soup = get_page("https://udn.com/news/breaknews/1/99#breaknews")
     
     sel = soup.find_all('div', class_='story-list__text')
 
     urls = []
     for s in sel:
-        u = s.find('a')['href']
+        try:
+            u = s.find('a')['href']
+        except Exception as error:
+            print(error)
+            print(s)
+            continue
         if u == '#':
             continue
         markspot = u.find('?')

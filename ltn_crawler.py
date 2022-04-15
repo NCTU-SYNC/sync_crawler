@@ -31,10 +31,14 @@ def parse_data(urls):
 			for url in data['data']:
 				urls.append(url['url'])	
 		else:
-			for _ in range(20):
-				number = str(count)
-				urls.append(data['data'][number]['url'])
-				count+=1
+			try:
+				for _ in range(20):
+					number = str(count)
+					urls.append(data['data'][number]['url'])
+					count+=1
+			except TypeError as e:
+				print('Parse data error!')
+				print(e)				
 		first = False
 
 def ltn_crawler(size=30):

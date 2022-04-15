@@ -22,6 +22,8 @@ LOCAL_COLLECTION  = database_config['cache']['collection']
 MONGODB_URI_MAIN  = database_config['main']['uri']
 MAIN_DATABASE     = database_config['main']['db']
 MAIN_COLLECTION   = database_config['main']['collection']
+DEV_MAIN_DATABASE = database_config['dev-main']['db']
+DEV_MAIN_COLLECTION   = database_config['dev-main']['collection']
 
 settings = ConfigParser(interpolation=None)
 settings.read('crawler_settings.ini')
@@ -73,10 +75,11 @@ def crawl_and_store(media,num_of_articles):
 
     collection_local = u.get_db_instance(LOCAL_DATABASE,LOCAL_COLLECTION,MONGODB_URI_LOCAL)
     collection_main = u.get_db_instance(MAIN_DATABASE,MAIN_COLLECTION,MONGODB_URI_MAIN)
+    collection_dev_main = u.get_db_instance(DEV_MAIN_DATABASE, DEV_MAIN_COLLECTION, MONGODB_URI_MAIN)
     recent_news = crawlers[media](num_of_articles)
     u.log_info('Updating database ...')
     for article in recent_news:
-        u.update_dbs(collection_local,collection_main,article)
+        u.update_dbs(collection_local,collection_main,collection_dev_main,article)
     u.log_info('Update complete.')
 
 def delete_n_documents(collection,media,n):
@@ -136,7 +139,7 @@ def clear_local_database(n,limit):
             u.log_info('count after deletion:{}'.format(current_count))
 
 
-schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
+# schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
 schedule.every(CNA_FREQ).minutes.do(cna,num_of_articles=CNA_NUM)
 schedule.every(CTS_FREQ).minutes.do(cts,num_of_articles=CTS_NUM)
 schedule.every(EBC_FREQ).minutes.do(ebc,num_of_articles=EBC_NUM)

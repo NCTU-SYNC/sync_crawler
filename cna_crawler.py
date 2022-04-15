@@ -21,8 +21,8 @@ def cna_crawler(size=30):
 
 	news_count = 0
 	for url in urls:
-		soup = get_page(url)
 		try:
+			soup = get_page(url)
 			category = soup.find('div', 'breadcrumb').find_all('a')[1].text
 			title = soup.find('div', 'centralContent').find('h1').text
 			sel = soup.find('div', 'paragraph').find_all('p')

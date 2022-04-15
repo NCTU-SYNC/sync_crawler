@@ -63,7 +63,7 @@ def db_update(collection,news_dict):
     else:
         collection.insert_one(news_dict)
 
-def update_dbs(collection_local,collection_main,news_dict):
+def update_dbs(collection_local,collection_main,collection_dev_main,news_dict):
     """Update both the local database and main database with news_dict.
 
     Arguments:
@@ -81,10 +81,12 @@ def update_dbs(collection_local,collection_main,news_dict):
         if find['content_hash'] != news_dict['content_hash']:
             collection_local.update_one({'_id': find['_id']},{'$set':news_dict})
             collection_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
+            collection_dev_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
     else:
         collection_local.insert_one(news_dict)
         del news_dict['_id']
         collection_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
+        collection_dev_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
 
 def convert_to_utc(date_object):
     """ Convert a naive datetime object to aware datetime object with timezone = utc """
