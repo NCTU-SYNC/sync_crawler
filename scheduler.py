@@ -1,13 +1,14 @@
-from chinatimes_crawler import chinatimes_crawler
-from cna_crawler import cna_crawler
-from cts_crawler import cts_crawler
-from ebc_crawler import ebc_crawler
-from ettoday_crawler import ettoday_crawler
-from factcheckcenter_crawler import factcheckcenter_crawler
-from ltn_crawler import ltn_crawler
-from storm_crawler import storm_crawler
-from udn_crawler import udn_crawler
-from setn_crawler import setn_crawler
+from news.chinatimes_crawler import chinatimes_crawler
+from news.cna_crawler import cna_crawler
+from news.cts_crawler import cts_crawler
+from news.ebc_crawler import ebc_crawler
+from news.ettoday_crawler import ettoday_crawler
+from news.factcheckcenter_crawler import factcheckcenter_crawler
+from news.ltn_crawler import ltn_crawler
+from news.storm_crawler import storm_crawler
+from news.udn_crawler import udn_crawler
+from news.setn_crawler import setn_crawler
+
 from pymongo import MongoClient
 from configparser import ConfigParser
 import utilities as u
@@ -75,6 +76,7 @@ def crawl_and_store(media,num_of_articles):
 
     collection_local = u.get_db_instance(LOCAL_DATABASE,LOCAL_COLLECTION,MONGODB_URI_LOCAL)
     collection_main = u.get_db_instance(MAIN_DATABASE,MAIN_COLLECTION,MONGODB_URI_MAIN)
+    print(collection_main,"....")
     collection_dev_main = u.get_db_instance(DEV_MAIN_DATABASE, DEV_MAIN_COLLECTION, MONGODB_URI_MAIN)
     recent_news = crawlers[media](num_of_articles)
     u.log_info('Updating database ...')

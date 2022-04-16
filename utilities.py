@@ -40,6 +40,11 @@ def get_db_instance(database,collection,mongodb_uri='mongodb://localhost:27017/'
         collection: type string
         mongodb_uri: type string, sample format: mongodb://localhost:27017/
     """
+    if(database=="None"):
+        print("database: none")
+        return None
+    print(database,"ttt")
+    print("database: hit  "+mongodb_uri)
     client = MongoClient(mongodb_uri)
     db = client[database]
     return db[collection]
@@ -61,13 +66,20 @@ def update_dbs(collection_local,collection_main,collection_dev_main,news_dict):
     if find:
         if find['content_hash'] != news_dict['content_hash']:
             collection_local.update_one({'_id': find['_id']},{'$set':news_dict})
-            collection_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
-            collection_dev_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
+            if collection_main!=None:
+                collection_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
+            if collection_dev_main!=None:
+                collection_dev_main.update_one({'url_hash': news_dict['url_hash']},{'$set':news_dict})
     else:
         collection_local.insert_one(news_dict)
         del news_dict['_id']
-        collection_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
-        collection_dev_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
+        print(collection_main)
+        print("hello")
+        if collection_main!=None:
+            print("any?")
+            collection_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
+        if collection_dev_main!=None:
+            collection_dev_main.replace_one({'url_hash': news_dict['url_hash']},news_dict,upsert=True)
 
 def convert_to_utc(date_object):
     """ Convert a naive datetime object to aware datetime object with timezone = utc """
