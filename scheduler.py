@@ -13,6 +13,7 @@ from pymongo import MongoClient
 from configparser import ConfigParser
 import utilities as u
 import schedule,time,pymongo
+import logging
 
 database_config = ConfigParser(interpolation=None)
 database_config.read('database_config.ini')
@@ -25,6 +26,9 @@ MAIN_DATABASE     = database_config['main']['db']
 MAIN_COLLECTION   = database_config['main']['collection']
 DEV_MAIN_DATABASE = database_config['dev-main']['db']
 DEV_MAIN_COLLECTION   = database_config['dev-main']['collection']
+
+logging.basicConfig(filename='error_test.log' , level = logging.ERROR ,
+    format = '%(asctime)s:%(levelname)s:%(message)s')
 
 settings = ConfigParser(interpolation=None)
 settings.read('crawler_settings.ini')
@@ -55,6 +59,8 @@ CLEAR_NUM   = settings['reset_cache'].getint('clear_count')
 CLEAR_LIMIT = settings['reset_cache'].getint('clear_limit')
 CLEAR_FREQ  = settings['reset_cache'].getint('clear_freq')
 
+error_list=[]
+
 MEDIA_LIST = ['中時','中央社','華視','東森','ettoday','台灣事實查核中心','自由時報','風傳媒','聯合','三立']
 MEDIA_LIST_EN = ['chinatimes', 'cna', 'cts', 'ebc', 'ettoday', 'factcheckcenter', 'ltn', 'storm', 'udn', 'setn']
 
@@ -73,16 +79,25 @@ crawlers = {
 
 def crawl_and_store(media,num_of_articles):
     u.log_info('Crawling {} ...'.format(media))
-
+    if media in error_list:
+        print(f"{media} is in error list --> skip")
+        return
     collection_local = u.get_db_instance(LOCAL_DATABASE,LOCAL_COLLECTION,MONGODB_URI_LOCAL)
     collection_main = u.get_db_instance(MAIN_DATABASE,MAIN_COLLECTION,MONGODB_URI_MAIN)
     print(collection_main,"....")
     collection_dev_main = u.get_db_instance(DEV_MAIN_DATABASE, DEV_MAIN_COLLECTION, MONGODB_URI_MAIN)
-    recent_news = crawlers[media](num_of_articles)
-    u.log_info('Updating database ...')
-    for article in recent_news:
-        u.update_dbs(collection_local,collection_main,collection_dev_main,article)
-    u.log_info('Update complete.')
+    try:
+        recent_news = crawlers[media](num_of_articles)
+    except Exception as e:
+        # print(e,"...")
+        error_list.append(media)
+        logging.error(f"error_list: {error_list} have been stopped\n {e}")
+    else:
+        u.log_info('Updating database ...')
+        for article in recent_news:
+            u.update_dbs(collection_local,collection_main,collection_dev_main,article)
+    finally:
+        u.log_info('Update complete.')
 
 def delete_n_documents(collection,media,n):
     """ Delete n of the oldest articles of from the collection """
