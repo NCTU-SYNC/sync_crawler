@@ -1,8 +1,0 @@
-2022-04-18 20:29:03,570:ERROR:error_list: ['ettoday'] have been stopped
- Message: 'chromedriver' executable needs to be in PATH. Please see https://sites.google.com/a/chromium.org/chromedriver/home
-
-2022-04-18 20:29:03,575:ERROR:error_list: ['ettoday', 'udn'] have been stopped
- local variable 'driver' referenced before assignment
-2022-04-18 20:33:07,775:ERROR:error_list: ['ettoday'] have been stopped
- Message: 'chromedriver' executable needs to be in PATH. Please see https://sites.google.com/a/chromium.org/chromedriver/home
-

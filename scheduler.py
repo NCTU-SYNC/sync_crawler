@@ -80,8 +80,9 @@ crawlers = {
 def crawl_and_store(media,num_of_articles):
     u.log_info('Crawling {} ...'.format(media))
     if media in error_list:
-        print(f"{media} is in error list --> skip")
-        return
+        # print(f"{media} is in error list --> skip")
+        print(f"{media} is in error list -")
+    #     return
     collection_local = u.get_db_instance(LOCAL_DATABASE,LOCAL_COLLECTION,MONGODB_URI_LOCAL)
     collection_main = u.get_db_instance(MAIN_DATABASE,MAIN_COLLECTION,MONGODB_URI_MAIN)
     print(collection_main,"....")
