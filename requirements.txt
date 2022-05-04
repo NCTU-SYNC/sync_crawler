@@ -9,3 +9,4 @@ schedule==1.0.0
 selenium==3.141.0
 soupsieve==2.2
 urllib3==1.26.3
+elasticsearch==8.1.3
