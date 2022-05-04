@@ -1,7 +1,6 @@
 from pymongo import MongoClient
 from configparser import ConfigParser
 from elasticsearch import Elasticsearch
-es = Elasticsearch("http://localhost:9200")
 
 database_config = ConfigParser(interpolation=None)
 database_config.read('..\database_config.ini')
@@ -9,6 +8,15 @@ database_config.read('..\database_config.ini')
 MONGODB_URI_LOCAL = database_config['cache']['uri']
 LOCAL_DATABASE    = database_config['cache']['db']
 LOCAL_COLLECTION  = database_config['cache']['collection']
+
+username = database_config['elastic']['username']
+secret   = database_config['elastic']['secret']
+es = Elasticsearch(
+    ['https://localhost:9200/'],
+    basic_auth=(username,secret),
+)
+
+
 
 # MONGODB_URI_MAIN  = database_config['main']['uri']
 # MAIN_DATABASE     = database_config['main']['db']
