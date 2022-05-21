@@ -8,21 +8,18 @@ username = database_config['elastic']['username']
 secret   = database_config['elastic']['secret']
 local_secret = database_config['elastic']['local_secret']
 
-es = Elasticsearch(f"http://{username}:{local_secret}@localhost:9200")
-# es = Elasticsearch(f"https://{username}:{secret}@212b-140-113-214-146.jp.ngrok.io")
+# es = Elasticsearch(f"http://{username}:{local_secret}@localhost:9200")
+es = Elasticsearch(f"https://{username}:{secret}@3bbb-140-113-214-146.jp.ngrok.io")
 
-
+es.indices.refresh(index="mainmax")
 body={
-    "from":0,
-    "size":10000,   #可以試試看10001
     "query": {
         "match": {
-            "content":"酷喔"   #doc_type  #能源 電動車 
+            "content":"懷念媽媽吃飯 台北 滷肉 神級"  
         }
     }
 }
-resp = es.search(index="main", body=body)
-# print(resp)
+resp = es.search(index="mainmax", body=body)
 print(f"Got {resp['hits']['total']['value']} Hits:")
 limit=5
 for index,hit in enumerate(resp['hits']['hits']):
