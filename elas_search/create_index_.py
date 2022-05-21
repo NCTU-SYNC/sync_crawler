@@ -10,8 +10,8 @@ username = database_config['elastic']['username']
 secret   = database_config['elastic']['secret']
 local_secret = database_config['elastic']['local_secret']
 
-es = Elasticsearch(f"http://{username}:{local_secret}@localhost:9200")
-# es = Elasticsearch(f"https://{username}:{secret}@212b-140-113-214-146.jp.ngrok.io")
+# es = Elasticsearch(f"http://{username}:{local_secret}@localhost:9200")
+es = Elasticsearch(f"https://{username}:{secret}@3bbb-140-113-214-146.jp.ngrok.io")
 
 MONGODB_URI = database_config['cache']['uri']
 
@@ -31,7 +31,7 @@ def index_DB_data(_db_uri,_db,_col,offset,limitNum,index,doc_type):
     Newses=col.find().skip(offset).limit(limitNum)
 
     for news in Newses:
-        print(news['title'],type(news['_id']),news['_id'])
+        # print(news['title'],type(news['_id']),news['_id'])
         doc = {
             'title'  : news['title'],
             'content': news['content']
@@ -41,7 +41,7 @@ def index_DB_data(_db_uri,_db,_col,offset,limitNum,index,doc_type):
 
 
 # index_DB_data(MONGODB_URI,LOCAL_DATABASE,LOCAL_COLLECTION,0,15,"cache","cacheType")  #345
-# index_DB_data(MONGODB_URI,MAIN_DATABASE,MAIN_COLLECTION ,0,1000,"main2","mainType")    #100,000大概一秒
+# index_DB_data(MONGODB_URI,MAIN_DATABASE,MAIN_COLLECTION ,41,39,"mainmax","mainType")    #100,000大概一秒
 
 
 
@@ -53,7 +53,7 @@ col = db[MAIN_COLLECTION ]
 
 
 
-Newses=col.find().skip(1039920).limit(5)
+Newses=col.find().skip(1039919).limit(5)
 for news in Newses:
     print(news['title'],type(news['_id']),news['_id'])
 
