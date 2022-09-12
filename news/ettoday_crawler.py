@@ -1,12 +1,11 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from utilities import get_page,generate_hash
 import utilities
 import time,datetime
 import hashlib
+import feedparser
 
 def ettoday_crawler(size=30):
 
@@ -15,36 +14,21 @@ def ettoday_crawler(size=30):
 	media = 'ettoday'
 	article_list = list()
 
-	#initiate chrome webdriver
-
-	options = Options()
-	options.add_argument("--disable-notifications")
-	options.headless = True
-
-	driver = webdriver.Chrome('chromedriver', options=options)
-	driver.get("https://www.ettoday.net/news/news-list.htm")
-	for _ in range(1,3):
-		driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-		time.sleep(3)
-
-	soup = BeautifulSoup(driver.page_source, 'html.parser')
-	sel = soup.find('div', 'part_list_2').find_all('h3')
 	article_count = 0
+	# get newslist from rss feed
+	NewsFeed = feedparser.parse("https://feeds.feedburner.com/ettoday/realtime")
+	news_link_list = [ entry['link'][:-9] for entry in NewsFeed.entries ] # remove "fromrss" from link
 
-	#exit selenium
-	driver.quit()
-
-	for s in sel:
-		modified_date = s.find('span').text
-		modified_date = datetime.datetime.strptime(modified_date, "%Y/%m/%d %H:%M")
-		modified_date = utilities.convert_to_utc(modified_date)
-
-		category = s.find('em').text
-		url = base + s.find('a')['href']
+	for url in news_link_list:
 		try:
 			soup = get_page(url)
 			title = soup.find('h1', 'title').text
+			category = soup.find(class_=['menu_bread_crumb', 'part_breadcrumb']).find_all('div')[1].text.strip()
 
+			modified_date = soup.find('time', attrs={'itemprop': 'datePublished'})['datetime']
+			modified_date = datetime.datetime.fromisoformat(modified_date)
+			modified_date = utilities.convert_to_utc(modified_date)
+   
 			article_content = []
 			content_str = ""
 			content_str += title
@@ -77,7 +61,6 @@ def ettoday_crawler(size=30):
 			news_dict['url_hash'] = url_hash
 			news_dict['content_hash'] = content_hash
 
-			#print(news_dict)
 			article_list.append(news_dict)
 
 			article_count+=1
