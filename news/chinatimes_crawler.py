@@ -22,7 +22,7 @@ def chinatimes_crawler(size=30):
 
         for s in sel:
             u = s.find(class_='title').find('a')['href']
-            urls.append('https://chinatimes.com'+u)
+            urls.append('https://www.chinatimes.com'+u)
 
     news_count = 0
     for url in urls:
