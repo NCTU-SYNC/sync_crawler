@@ -1,54 +1,36 @@
 # -!- coding: utf-8 -!-
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from utilities import get_page,generate_hash
 import time,datetime
 import hashlib,utilities
+import requests
 
 def udn_crawler(size=30):
 
     media = '聯合'
     article_list = list()
-
+    urls = list()
+    pages = [1,2,3]
     try:
-        #initiate chrome webdriver
-        options = Options()
-        options.add_argument("--disable-notifications")
-        options.add_argument("--window-size=1920,1080")
-        options.headless = True
-        driver = webdriver.Chrome('chromedriver', options=options)
-        driver.get("https://udn.com/news/breaknews/1/99#breaknews")
-
-        for _ in range(1,5):
-            driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-            time.sleep(3)
-
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-        driver.quit()
+        for i in pages:
+            response = requests.get(
+                "https://udn.com/api/more",
+                params={
+                    'page': i,
+                    'id': '',
+                    'channelId': 1,
+                    'cate_id': 99,
+                    'type': 'breaknews'
+                })
+            
+            json_response = response.json()
+            lists = json_response['lists']
+            urls.extend([ 'https://udn.com' + item['titleLink'] for item in lists ])
     
     except Exception as error:
-        utilities.log_info("Selenium start error, error code:")
+        utilities.log_info("URL list request error.")
         print(error)
-        driver.quit()
-        soup = get_page("https://udn.com/news/breaknews/1/99#breaknews")
-    
-    sel = soup.find_all('div', class_='story-list__text')
-
-    urls = []
-    for s in sel:
-        try:
-            u = s.find('a')['href']
-        except Exception as error:
-            print(error)
-            print(s)
-            continue
-        if u == '#':
-            continue
-        markspot = u.find('?')
-        u = u[:markspot]
-        urls.append('https://udn.com'+u)
 
     article_count = 0
     #for each individual article
@@ -104,3 +86,6 @@ def udn_crawler(size=30):
             continue
     
     return article_list
+
+if __name__ == "__main__":
+    print(udn_crawler())
