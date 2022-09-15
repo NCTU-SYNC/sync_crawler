@@ -118,7 +118,6 @@ def ltn_crawler(size=30):
 			news_dict['url_hash'] = url_hash
 			news_dict['content_hash'] = content_hash
 
-			#print(news_dict)
 			article_list.append(news_dict)
 
 			article_count+=1

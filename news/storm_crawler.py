@@ -18,11 +18,18 @@ def storm_crawler(size=30):
 			"https://www.storm.mg/articles/5","https://www.storm.mg/articles/6"]
 
 	for link in links:
-		soup = get_page(link)
-		sel = soup.find_all('div', 'category_card card_thumbs_left')
-
-		for s in sel:
-			urls.append(s.find('a')['href'])
+		try:
+			soup = get_page(link)
+			sel = soup.find_all('div', 'category_card card_thumbs_left')
+			for s in sel:
+				urls.append(s.find('a')['href'])
+		except Exception as error:
+			utilities.log_info("URL list request error.")
+			print("風傳媒storm")
+			print(link)
+			print(error)
+			continue
+		
 
 	article_count = 0
 	for url in urls:

@@ -23,8 +23,8 @@ def factcheckcenter_crawler(size=10):
 
 	article_count = 0
 	for url in urls:
-		soup = get_page(url)
 		try:
+			soup = get_page(url)
 			category = soup.find('div','field-name-field-taxo-report-attr').text.strip()
 			title = soup.find('h2', 'node-title').text
 			para = soup.find('div', 'field field-name-body field-type-text-with-summary field-label-hidden').find_all(['p','h2']) #get headings and content

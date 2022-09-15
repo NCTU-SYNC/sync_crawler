@@ -17,12 +17,15 @@ def chinatimes_crawler(size=30):
             'https://www.chinatimes.com/realtimenews/?page=5']
     urls = []
     for link in links:
-        soup = get_page(link)
-        sel = soup.find_all('div', class_='articlebox-compact')
+        try:
+            soup = get_page(link)
+            sel = soup.find_all('div', class_='articlebox-compact')
 
-        for s in sel:
-            u = s.find(class_='title').find('a')['href']
-            urls.append('https://www.chinatimes.com'+u)
+            for s in sel:
+                u = s.find(class_='title').find('a')['href']
+                urls.append('https://www.chinatimes.com'+u)
+        except Exception as error:
+            print("")
 
     news_count = 0
     for url in urls:

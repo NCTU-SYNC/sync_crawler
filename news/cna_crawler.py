@@ -10,9 +10,12 @@ def cna_crawler(size=30):
 
 	media = '中央社'
 	article_list = list()
-
-	soup = get_page('https://www.cna.com.tw/list/aall.aspx')
-	sel = soup.find('ul', 'mainList imgModule', id = 'jsMainList').find_all('li')
+	try:
+		soup = get_page('https://www.cna.com.tw/list/aall.aspx')
+		sel = soup.find('ul', 'mainList imgModule', id = 'jsMainList').find_all('li')
+	except Exception as error:
+		print("URL list fetch error")
+		return article_list
 
 	#add each url to url list
 	urls = []

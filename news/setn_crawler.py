@@ -30,8 +30,8 @@ def setn_crawler(size=30):
 	article_count = 0
 
 	for url in urls:
-		soup = get_page(url)
 		try:
+			soup = get_page(url)
 			category = soup.find('meta',attrs={'property':'article:section'})['content']
 			title = soup.find('h1').text
 			content_sel = soup.find('article').find_all('p')
