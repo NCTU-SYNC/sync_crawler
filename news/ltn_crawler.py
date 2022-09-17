@@ -11,13 +11,13 @@ url_title = ["https://news.ltn.com.tw/ajax/breakingnews/all/1", "https://news.lt
 headers =  {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
 
 def get_one_page(url):
-    try:
-        response = requests.get(url,headers=headers)
-        if response.status_code == 200:
-        	return response.json()
-        return None
-    except :
-        print("page fetch fail")
+	try:
+		response = requests.get(url,headers=headers)
+		if response.status_code == 200:
+			return response.json()
+		return None
+	except:
+		print("page fetch fail")
 
 def parse_data(urls):
 	first = True

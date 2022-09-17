@@ -1,35 +1,34 @@
 # -!- coding: utf-8 -!-
-import requests
-from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
 import utilities
-import time,datetime
-import hashlib
+import datetime
 
 def chinatimes_crawler(size=30):
 
     media = '中時'
     article_list = []
 
-    #retrieve news list for first five pages
-    links = ['https://www.chinatimes.com/realtimenews/','https://www.chinatimes.com/realtimenews/?page=2',
+    # get news list for first five pages
+    newslist_page = ['https://www.chinatimes.com/realtimenews/','https://www.chinatimes.com/realtimenews/?page=2',
             'https://www.chinatimes.com/realtimenews/?page=3','https://www.chinatimes.com/realtimenews/?page=4',
             'https://www.chinatimes.com/realtimenews/?page=5']
     urls = []
-    for link in links:
+    for page in newslist_page:
         try:
-            soup = get_page(link)
+            soup = get_page(page)
             sel = soup.find_all('div', class_='articlebox-compact')
 
             for s in sel:
                 u = s.find(class_='title').find('a')['href']
                 urls.append('https://www.chinatimes.com'+u)
         except Exception as error:
-            print("")
+            print("Get article url link error.")
+            print(page)
 
     news_count = 0
     for url in urls:
         try:
+
             soup = get_page(url)
             
             title = soup.find(class_='article-title').text

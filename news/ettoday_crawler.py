@@ -9,8 +9,6 @@ import feedparser
 
 def ettoday_crawler(size=30):
 
-	base = "https://www.ettoday.net"
-
 	media = 'ettoday'
 	article_list = list()
 
