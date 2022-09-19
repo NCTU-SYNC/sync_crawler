@@ -153,7 +153,7 @@ def clear_local_database(n,limit):
             u.log_info('count after deletion:{}'.format(current_count))
 
 
-# schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
+schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
 schedule.every(CNA_FREQ).minutes.do(cna,num_of_articles=CNA_NUM)
 schedule.every(CTS_FREQ).minutes.do(cts,num_of_articles=CTS_NUM)
 schedule.every(EBC_FREQ).minutes.do(ebc,num_of_articles=EBC_NUM)
