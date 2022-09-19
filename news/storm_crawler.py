@@ -1,10 +1,7 @@
 # -!- coding: utf-8 -!-
-import requests
-from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
-import time,datetime
+import datetime
 import utilities
-import hashlib
 
 def storm_crawler(size=30):
 

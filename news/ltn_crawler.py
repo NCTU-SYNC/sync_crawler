@@ -1,11 +1,8 @@
 # -!- coding: utf-8 -!-
 import requests
-from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
 import utilities
-import json
-import time,datetime
-import hashlib
+import datetime
 
 url_title = ["https://news.ltn.com.tw/ajax/breakingnews/all/1", "https://news.ltn.com.tw/ajax/breakingnews/all/2", "https://news.ltn.com.tw/ajax/breakingnews/all/3", "https://news.ltn.com.tw/ajax/breakingnews/all/4", "https://news.ltn.com.tw/ajax/breakingnews/all/5"]
 headers =  {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}

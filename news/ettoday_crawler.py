@@ -1,10 +1,7 @@
 # -!- coding: utf-8 -!-
-import requests
-from bs4 import BeautifulSoup
 from utilities import get_page,generate_hash
 import utilities
-import time,datetime
-import hashlib
+import datetime
 import feedparser
 
 def ettoday_crawler(size=30):
