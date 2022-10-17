@@ -151,18 +151,20 @@ def clear_local_database(n,limit):
             u.log_info('count after deletion:{}'.format(current_count))
 
 
-schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
-schedule.every(CNA_FREQ).minutes.do(cna,num_of_articles=CNA_NUM)
-schedule.every(CTS_FREQ).minutes.do(cts,num_of_articles=CTS_NUM)
-schedule.every(EBC_FREQ).minutes.do(ebc,num_of_articles=EBC_NUM)
-schedule.every(ETTODAY_FREQ).minutes.do(ettoday,num_of_articles=ETTODAY_NUM)
-schedule.every(FACTCHECKCENTER_FREQ).minutes.do(factcheckcenter,num_of_articles=FACTCHECKCENTER_NUM)
-schedule.every(LTN_FREQ).minutes.do(ltn,num_of_articles=LTN_NUM)
-schedule.every(STORM_FREQ).minutes.do(storm,num_of_articles=STORM_NUM)
-schedule.every(UDN_FREQ).minutes.do(udn,num_of_articles=UDN_NUM)
-schedule.every(SETN_FREQ).minutes.do(setn,num_of_articles=SETN_NUM)
-schedule.every(CLEAR_FREQ).minutes.do(clear_local_database,n=CLEAR_NUM,limit=CLEAR_LIMIT)
+if __name__ == "__main__":
+    
+    schedule.every(CHINATIMES_FREQ).minutes.do(chinatimes,num_of_articles=CHINATIMES_NUM)
+    schedule.every(CNA_FREQ).minutes.do(cna,num_of_articles=CNA_NUM)
+    schedule.every(CTS_FREQ).minutes.do(cts,num_of_articles=CTS_NUM)
+    schedule.every(EBC_FREQ).minutes.do(ebc,num_of_articles=EBC_NUM)
+    schedule.every(ETTODAY_FREQ).minutes.do(ettoday,num_of_articles=ETTODAY_NUM)
+    schedule.every(FACTCHECKCENTER_FREQ).minutes.do(factcheckcenter,num_of_articles=FACTCHECKCENTER_NUM)
+    schedule.every(LTN_FREQ).minutes.do(ltn,num_of_articles=LTN_NUM)
+    schedule.every(STORM_FREQ).minutes.do(storm,num_of_articles=STORM_NUM)
+    schedule.every(UDN_FREQ).minutes.do(udn,num_of_articles=UDN_NUM)
+    schedule.every(SETN_FREQ).minutes.do(setn,num_of_articles=SETN_NUM)
+    schedule.every(CLEAR_FREQ).minutes.do(clear_local_database,n=CLEAR_NUM,limit=CLEAR_LIMIT)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
